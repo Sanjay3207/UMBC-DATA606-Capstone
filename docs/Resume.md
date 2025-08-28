@@ -4,7 +4,7 @@
 
 📧 [vsanjay3207@gmail.com](mailto:vsanjay3207@gmail.com)  
 📞 (443) 418-2325  
-🌐 [LinkedIn](https://www.linkedin.com/in/sanjay-varatharajan-a0a448171) | [GitHub](https://github.com/yourusername)  
+🌐 [LinkedIn](https://www.linkedin.com/in/sanjay-varatharajan-a0a448171) | [GitHub](https://github.com/Sanjay3207)  
 📍 Baltimore, MD  
 
 ---
