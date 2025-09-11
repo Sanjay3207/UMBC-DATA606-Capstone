@@ -55,7 +55,7 @@ This capstone aims to design, implement, and evaluate an **end-to-end geospatial
 - **NASA FIRMS (MODIS/VIIRS active fire points)** — near real‑time fire detections for feature engineering and validation.  
 - **USDA Cropland Data Layer (CDL, 30 m, annual, USA)** — crop type labels and agricultural mask; available on GEE.  
 - **SRTM DEM (30 m)** — elevation-derived **slope**/aspect for fire spread risk.  
-- **(Optional) Weather/Reanalysis** — e.g., ERA5 temperature, humidity, wind for risk features.
+- **Weather/Reanalysis** — e.g., ERA5 temperature, humidity, wind for risk features.
 
 ### Local Copies
 The repo will maintain **scripts** to export curated **AOI mosaics and masks** into `data/raw/` and model‑ready tiles into `data/dataset/`. Large rasters will not be versioned; instead, **reproducible ETL** will be provided.
@@ -127,37 +127,9 @@ We will create 512×512 **image tiles** (10 m Sentinel‑2 grid) and aligned **m
 - **Storage:** AOI requests, metadata, and cached rasters in object storage (e.g., S3/GCS); analytics in **PostgreSQL/PostGIS**.  
 - **Deployment:** Render/AWS/GCP; horizontal scale by AOI job queue.
 
----
-
-## Baselines & Success Criteria
-
-- **Wildfire Segmentation:** Exceed a simple threshold baseline (e.g., NDVI drop) and target **mIoU ≥ 0.55** on held‑out regions.  
-- **Crop Segmentation:** Binary crop vs. non‑crop **F1 ≥ 0.85** on held‑out counties.  
-- **Latency:** Return AOI results (≤ 50 km²) in **< 2 minutes** on a single GPU or optimized CPU node.  
-- **Usability:** Web UI can accept AOI polygons and render results as overlays with a downloadable GeoTIFF/PNG.
 
 ---
 
-## Timeline (12 Weeks)
-
-- **W1–W2:** Literature review; AOI selection; GEE + ETL pipelines; first AOI tiles.  
-- **W3–W5:** Train wildfire segmentation baseline; metrics + error analysis.  
-- **W6–W7:** Train crop segmentation baseline (binary); evaluate + ablate features.  
-- **W8–W9:** Add wildfire risk (temporal features/model); cross‑region tests.  
-- **W10:** Build web platform MVP (AOI → overlays).  
-- **W11:** Performance tuning, caching, UX polish; case studies (CA wildfires; Midwest crops).  
-- **W12:** Final report, slide deck, recorded demo; repository cleanup.
-
----
-
-## Risks & Mitigations
-
-- **Clouds/Haze:** Use QA masks & temporal compositing.  
-- **Label Noise (MODIS/CDL):** Morphological cleaning, confidence thresholds, and selective AOI curation.  
-- **Domain Shift:** Explicit cross‑region validation; fine‑tuning on small samples from new regions.  
-- **Throughput:** Asynchronous job queue + caching; tile‑level batch inference; optional GPU serving.
-
----
 
 ## Ethics & Responsible AI
 
@@ -177,9 +149,3 @@ We will create 512×512 **image tiles** (10 m Sentinel‑2 grid) and aligned **m
 
 ---
 
-## Expected Business Value
-
-- **Agriculture:** Reduce input waste and yield volatility via timely stress detection.  
-- **Insurance:** Improve underwriting and portfolio risk pricing with dynamic hazard layers.  
-- **Utilities:** Prioritize vegetation management near critical infrastructure.  
-- **Public Sector:** Enhance disaster preparedness and food‑security monitoring.
