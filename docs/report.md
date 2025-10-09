@@ -1,5 +1,5 @@
-# California Wildfire EDA — Project Report
-**Author:** Sanjay  
+# Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring
+**Author:** Akhil Kanukula, Sanjay Varatharajan
 **Window:** 2024-07-20 → 2024-08-20 (all datasets except ERA5, which includes 2024-07-01 and 2024-08-01 snapshots)  
 **AOI:** California (statewide bounding box; ERA5 clipped to lon −125 to −113, lat 32.0 to 42.5)
 
