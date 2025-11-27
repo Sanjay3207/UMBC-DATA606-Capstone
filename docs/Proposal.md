@@ -1,10 +1,11 @@
-# Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring”
+# Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring
 
 **Project Title:** Predicting Wildfire Risk, Burned Area, and Crop Health from Satellite Imagery  
 **Prepared for:** UMBC Data Science Master’s Capstone (DATA606) — Advisor: Dr. Chaojie Wang  
 **Author:** Akhil Kanukula, Sanjay Varatharajan  
 **GitHub Repository:** https://github.com/Sanjay3207/UMBC-DATA606-Capstone  
-**LinkedIn Profile:** www.linkedin.com/in/sanjayv3207  
+**LinkedIn Profile:** A. www.linkedin.com/in/sanjayv3207  
+                      B. https://www.linkedin.com/in/akhil1729/
 
 
 ---
@@ -49,14 +50,13 @@ This capstone aims to design, implement, and evaluate an **end-to-end geospatial
 
 ## Data
 
-### Primary Data Sources (Public/Open)
-- **Sentinel‑2 Surface Reflectance (10 m, multispectral)** — input imagery (RGB, NIR, red‑edge): Copernicus Open Access / Google Earth Engine (GEE).  
-- **MODIS Burned Area (MCD64A1, 500 m, monthly)** — ground truth for burned area segmentation; available on GEE.  
-- **NASA FIRMS (MODIS/VIIRS active fire points)** — near real‑time fire detections for feature engineering and validation.  
-- **USDA Cropland Data Layer (CDL, 30 m, annual, USA)** — crop type labels and agricultural mask; available on GEE.  
-- **SRTM DEM (30 m)** — elevation-derived **slope**/aspect for fire spread risk.  
-- **Weather/Reanalysis** — e.g., ERA5 temperature, humidity, wind for risk features.
-
+Data Source,Resolution / Frequency,Primary Use Case
+Sentinel-2 Surface Reflectance,"10 m, multispectral","Input imagery for Wildfire Segmentation and Crop Monitoring (used to derive EVI, NBR, etc.)."
+NASA FIRMS (VIIRS Active Fire),"375 m, near real-time",Primary Label Source for the working segmentation pipeline; used to create VIIRS 375m Buffered Points.
+MODIS Burned Area (MCD64A1),"500 m, monthly",Ground Truth for burned area segmentation (as specified in the proposal).
+USDA Cropland Data Layer (CDL),"30 m, annual",Ground Truth for Crop Monitoring (crop type classification).
+SRTM DEM,30 m,Deriving topographical features (slope/aspect) for Wildfire Risk assessment.
+ERA5 Reanalysis,"Hourly, global","Providing meteorological features (temperature, humidity, wind) for Wildfire Risk modeling."
 ### Local Copies
 The repo will maintain **scripts** to export curated **AOI mosaics and masks** into `data/raw/` and model‑ready tiles into `data/dataset/`. Large rasters will not be versioned; instead, **reproducible ETL** will be provided.
 
