@@ -50,16 +50,19 @@ This capstone aims to design, implement, and evaluate an **end-to-end geospatial
 
 ## Data
 
-Data Source,Resolution / Frequency,Primary Use Case
-Sentinel-2 Surface Reflectance,"10 m, multispectral","Input imagery for Wildfire Segmentation and Crop Monitoring (used to derive EVI, NBR, etc.)."
-NASA FIRMS (VIIRS Active Fire),"375 m, near real-time",Primary Label Source for the working segmentation pipeline; used to create VIIRS 375m Buffered Points.
-MODIS Burned Area (MCD64A1),"500 m, monthly",Ground Truth for burned area segmentation (as specified in the proposal).
-USDA Cropland Data Layer (CDL),"30 m, annual",Ground Truth for Crop Monitoring (crop type classification).
-SRTM DEM,30 m,Deriving topographical features (slope/aspect) for Wildfire Risk assessment.
-ERA5 Reanalysis,"Hourly, global","Providing meteorological features (temperature, humidity, wind) for Wildfire Risk modeling."
-### Local Copies
-The repo will maintain **scripts** to export curated **AOI mosaics and masks** into `data/raw/` and model‑ready tiles into `data/dataset/`. Large rasters will not be versioned; instead, **reproducible ETL** will be provided.
+The selection of primary data sources for this project was driven by the necessity to fuse high spatial resolution, dense temporal sampling, and specialized predictive features required for a multi-objective geospatial machine learning platform. These sources collectively enable the platform to address segmentation accuracy, feature importance for risk, and model generalization.
 
+### High-Resolution Input and Feature Derivation
+
+The project's foundation is the fusion of Sentinel-2 and HLS (Harmonized Landsat Sentinel-2) products. This pairing was chosen specifically for its $\mathbf{30\text{ meter resolution}}$ and high temporal density, which is paramount for accurate Wildfire Segmentation and Crop Monitoring. The spectral bands from HLS are not used directly, but are transformed into the most powerful predictive features: the Normalized Burn Ratio (NBR), the Enhanced Vegetation Index (EVI), and the Normalized Difference Moisture Index (NDMI). These indices constitute the $\mathbf{5}$ predictive channels of our U-Net, linking subtle changes in land cover and vegetation moisture directly to the model's input. The fidelity of this $\mathbf{30\text{ meter}}$ feature stack is essential for meeting the $\text{IoU}$ baseline established in the research questions.
+
+### Precise Labeling and Latency Requirements
+
+For creating the ground truth, the project pivots to the VIIRS Active Fire product ($\mathbf{375\text{ meter resolution}}$). This choice is strategic, as VIIRS provides high-confidence, near-real-time detections (addressing the project's Latency requirement) which are then rasterized and buffered to form our segmentation labels. This method replaces slower, post-event disturbance masks like OPERA and MODIS MCD64A1, which were found to be inadequate for timely prediction. This fusion allows us to teach the model to predict the presence of a fire based on pre-event land conditions captured by HLS.
+
+### Contextual Risk Modeling and Generalization
+
+The project moves beyond simple segmentation by integrating non-spectral data critical for Wildfire Risk Assessment and Drought Forecasting. SMAP (Soil Moisture Active Passive) products (at $\mathbf{9\text{ km}}$ and $\mathbf{3\text{ km}}$ resolutions) were chosen as they provide indispensable metrics for subsurface moisture and drought conditions, which are leading indicators of fire vulnerability. Similarly, ERA5 Reanalysis data is integrated to provide crucial atmospheric proxies (temperature, wind, humidity) necessary for calculating established fire danger indices. The combination of high-resolution land metrics (HLS) with coarse-resolution environmental context (SMAP, ERA5) is the mechanism by which the project seeks to answer the Generalization Research Question: Can the model learn to predict risk across diverse biomes by understanding the non-spectral drivers of fire?
 ---
 
 ## Data Overview & Dictionary (Model-Ready Tiles)
