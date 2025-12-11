@@ -1,10 +1,10 @@
-# Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring”
+# Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring
 
 **Project Title:** Predicting Wildfire Risk, Burned Area, and Crop Health from Satellite Imagery  
 **Prepared for:** UMBC Data Science Master’s Capstone (DATA606) — Advisor: Dr. Chaojie Wang  
 **Author:** Akhil Kanukula, Sanjay Varatharajan  
 **GitHub Repository:** https://github.com/Sanjay3207/UMBC-DATA606-Capstone  
-**LinkedIn Profile:** www.linkedin.com/in/sanjayv3207  
+**LinkedIn Profile:** www.linkedin.com/in/sanjayv3207 [Sanjay Varatharajan] &  https://www.linkedin.com/in/akhil1729/ [Akhil Kanukula]
 
 
 ---
@@ -49,103 +49,206 @@ This capstone aims to design, implement, and evaluate an **end-to-end geospatial
 
 ## Data
 
-### Primary Data Sources (Public/Open)
-- **Sentinel‑2 Surface Reflectance (10 m, multispectral)** — input imagery (RGB, NIR, red‑edge): Copernicus Open Access / Google Earth Engine (GEE).  
-- **MODIS Burned Area (MCD64A1, 500 m, monthly)** — ground truth for burned area segmentation; available on GEE.  
-- **NASA FIRMS (MODIS/VIIRS active fire points)** — near real‑time fire detections for feature engineering and validation.  
-- **USDA Cropland Data Layer (CDL, 30 m, annual, USA)** — crop type labels and agricultural mask; available on GEE.  
-- **SRTM DEM (30 m)** — elevation-derived **slope**/aspect for fire spread risk.  
-- **Weather/Reanalysis** — e.g., ERA5 temperature, humidity, wind for risk features.
+The selection of primary data sources for this project was driven by the necessity to fuse high spatial resolution, dense temporal sampling, and specialized predictive features required for a multi-objective geospatial machine learning platform. These sources collectively enable the platform to address segmentation accuracy, feature importance for risk, and model generalization.
 
-### Local Copies
-The repo will maintain **scripts** to export curated **AOI mosaics and masks** into `data/raw/` and model‑ready tiles into `data/dataset/`. Large rasters will not be versioned; instead, **reproducible ETL** will be provided.
+### High-Resolution Input and Feature Derivation
+
+The project's foundation is the fusion of Sentinel-2 and HLS (Harmonized Landsat Sentinel-2) products. This pairing was chosen specifically for its $\mathbf{30\text{ meter resolution}}$ and high temporal density, which is paramount for accurate Wildfire Segmentation and Crop Monitoring. The spectral bands from HLS are not used directly, but are transformed into the most powerful predictive features: the Normalized Burn Ratio (NBR), the Enhanced Vegetation Index (EVI), and the Normalized Difference Moisture Index (NDMI). These indices constitute the $\mathbf{5}$ predictive channels of our U-Net, linking subtle changes in land cover and vegetation moisture directly to the model's input. The fidelity of this $\mathbf{30\text{ meter}}$ feature stack is essential for meeting the $\text{IoU}$ baseline established in the research questions.
+
+### Precise Labeling and Latency Requirements
+
+For creating the ground truth, the project pivots to the VIIRS Active Fire product ($\mathbf{375\text{ meter resolution}}$). This choice is strategic, as VIIRS provides high-confidence, near-real-time detections (addressing the project's Latency requirement) which are then rasterized and buffered to form our segmentation labels. This method replaces slower, post-event disturbance masks like OPERA and MODIS MCD64A1, which were found to be inadequate for timely prediction. This fusion allows us to teach the model to predict the presence of a fire based on pre-event land conditions captured by HLS.
+
+### Contextual Risk Modeling and Generalization
+
+The project moves beyond simple segmentation by integrating non-spectral data critical for Wildfire Risk Assessment and Drought Forecasting. SMAP (Soil Moisture Active Passive) products (at $\mathbf{9\text{ km}}$ and $\mathbf{3\text{ km}}$ resolutions) were chosen as they provide indispensable metrics for subsurface moisture and drought conditions, which are leading indicators of fire vulnerability. Similarly, ERA5 Reanalysis data is integrated to provide crucial atmospheric proxies (temperature, wind, humidity) necessary for calculating established fire danger indices. The combination of high-resolution land metrics (HLS) with coarse-resolution environmental context (SMAP, ERA5) is the mechanism by which the project seeks to answer the Generalization Research Question: Can the model learn to predict risk across diverse biomes by understanding the non-spectral drivers of fire?
 
 ---
 
-## Data Overview & Dictionary (Model-Ready Tiles)
+## 📊 Data Overview and Dictionary 
 
-We will create 512×512 **image tiles** (10 m Sentinel‑2 grid) and aligned **mask tiles** for two tasks: **wildfire segmentation** and **crop segmentation**.
+The final data architecture is based on fusing high-resolution HLS features with precise VIIRS active fire labels, all aligned to a common **EPSG:32610** grid.
 
-| Field | Type | Description | Example |
-|---|---|---|---|
-| `tile_id` | string | Unique tile identifier (`y{row}_x{col}`) | `y10240_x2560` |
-| `aoi_name` | string | AOI tag for stratified splits | `Sonoma_CA` |
-| `acq_date` | date | Mosaic acquisition window mid-date | `2021-08-01` |
-| `img_rgbn` | 3–4ch PNG | Sentinel‑2 RGB(+NIR) tile, normalized to [0,1] | `images/y10240_x2560.png` |
-| `ndvi` / `ndwi` / `nbr` | float32 rasters | Vegetation & water indices (derived) | stored or recomputed |
-| `slope` | float32 raster | From SRTM (reprojected to S2 grid) | optional |
-| `burned_mask` | uint8 PNG | 0/1 mask from MODIS MCD64A1 reprojected to S2 grid | `wildfire/masks/*.png` |
-| `crop_mask` | uint8 PNG | Crop vs. non‑crop or mapped CDL classes | `crop/masks/*.png` |
-| `region_split` | {train,val,test} | Stratified split by region/city | `train` |
+### I. Model Input Features (Predictors: Bands 0–4)
 
-> **Targets:**  
-> • **Wildfire Segmentation:** `burned_mask ∈ {0,1}`.  
-> • **Crop Segmentation:** `crop_mask ∈ {0,…,K}` (start with binary crop vs. non‑crop; optionally map CDL classes to a small K).
+These are the five spectral indices derived from HLS imagery, which form the $\mathbf{5}$ predictive channels of the U-Net. They are stored as **float32** values within the chip NumPy array.
+
+| Field Name | Source | Data Type | Description |
+| :--- | :--- | :--- | :--- |
+| **EVI** | HLS-VI (Sentinel-2) | `float32` | **Enhanced Vegetation Index:** Measures vegetation health, adjusted for canopy background noise and atmospheric effects. |
+| **MSAVI** | HLS-VI (Sentinel-2) | `float32` | **Modified Soil Adjusted Vegetation Index:** Minimizes the influence of bare soil on the vegetation signal. |
+| **NBR** | HLS-VI (Sentinel-2) | `float32` | **Normalized Burn Ratio:** The primary index for detecting stressed and burned vegetation (critical for segmentation). |
+| **NBR2** | HLS-VI (Sentinel-2) | `float32` | **Secondary Normalized Burn Ratio:** Used to distinguish between severity levels. |
+| **NDMI** | HLS-VI (Sentinel-2) | `float32` | **Normalized Difference Moisture Index:** Tracks canopy water content, a key factor in fire readiness. |
+
+***
+
+### II. Model Output Label (Target: Band 5)
+
+This is the ground truth layer for the **Wildfire Segmentation** objective. It is derived from VIIRS vector points and rasterized into our chip.
+
+| Field Name | Source | Spatial Resolution | Description |
+| :--- | :--- | :--- | :--- |
+| **Fire Mask (Burned Mask)** | VIIRS Active Fire ($\mathbf{375\text{m}}$) | $\mathbf{30\text{m}}$ (Rasterized) | **Binary Label ($\mathbf{0}$ or $\mathbf{1}$):** A pixel is $\mathbf{1}$ if it falls within the $\mathbf{375\text{ meter buffered area}}$ of a high/nominal/low confidence VIIRS active fire point. The target for U-Net segmentation. |
+
+***
+
+### III. Contextual Risk Features (Future Integration)
+
+The following external datasets are prioritized for integration in the next phase to enable **Wildfire Risk Assessment**. They will be aligned temporally and spatially to the chip dataset.
+
+| Data Source | Type | Spatial/Temporal Resolution | Feature Role |
+| :--- | :--- | :--- | :--- |
+| **SMAP L3 Radiometer** | Soil Moisture (Radiometer) | $\mathbf{9\text{ km}}$ / Daily | **Drought Indicator:** Measures subsurface moisture, a fundamental predictor of fuel availability and fire risk. |
+| **ERA5 Reanalysis** | Atmospheric Model Data | Hourly / Global ($\approx\mathbf{31\text{ km}}$) | **Fire Danger Proxies:** Provides critical variables (temperature, relative humidity, wind speed) used to calculate established fire danger indices. |
 
 ---
 
 ## Features
 
-- **Spectral:** RGB, NIR, red‑edge; indices: **NDVI**, **NDWI**, **NBR** (if SWIR is added).  
-- **Topographic:** **Slope** (from DEM).  
-- **Temporal:** Rolling composites (e.g., median of last N weeks), lags, and trend deltas for risk/yield proxies.  
-- **Contextual:** Prior burned area, distance to roads/settlements (optional).  
-- **Meteorology (optional):** ERA5 temperature, wind, humidity (aggregated to tile).
+## Final Feature Inventory (Current Status)
+
+This inventory defines the definitive feature set currently implemented and available in the $\mathbf{32 \times 32}$ chips generated by the pipeline. These features are the direct result of stabilizing the HLS $\to$ VIIRS data flow.
+
+### Level I: Implemented Features (Ready for Model Training)
+
+These are the five spectral indices that constitute the **5 predictor channels** of the U-Net input.
+
+| Category | Feature Name | Data Type | Description |
+| :--- | :--- | :--- | :--- |
+| **Spectral Indices** | **NBR** | `float32` | Normalized Burn Ratio (Primary index for fire and severity). |
+| **Spectral Indices** | **EVI** | `float32` | Enhanced Vegetation Index (Measures vegetation health/density). |
+| **Spectral Indices** | **NDMI** | `float32` | Normalized Difference Moisture Index (Tracks canopy water stress). |
+| **Spectral Indices** | **MSAVI** | `float32` | Modified Soil Adjusted Vegetation Index (Accounts for soil background). |
+| **Spectral Indices** | **NBR2** | `float32` | Secondary Normalized Burn Ratio (Used for distinguishing severity levels). |
+
+***
+
+### Level II: Features Slated for Phase II Integration
+
+These features are required to achieve the **Wildfire Risk** and advanced **Crop Monitoring** objectives and will be added during the feature engineering stage of the modeling phase.
+
+| Category | Feature Name | Source | Integration Status |
+| :--- | :--- | :--- | :--- |
+| **Meteorology** | **ERA5 (T, Wind, Humidity)** | ERA5 Reanalysis | **Highest Priority.** Required for the **Wildfire Risk** objective. |
+| **Topographic** | **Slope / Aspect** | SRTM DEM ($\mathbf{30\text{m}}$) | **Pending.** Requires alignment and resampling of DEM data. |
+| **Temporal** | **Rolling Composites / Lags** | HLS/VIIRS Time Series | **Pending.** Requires modifying the pipeline to process multiple dates for calculation. |
 
 ---
 
 ## Methods
 
-1. **ETL & Tiling**  
-   - GEE scripts produce AOI mosaics and masks.  
-   - Python (rasterio/rioxarray) aligns all rasters to **S2 10 m grid** and generates tiles.
+We utilized a multi-stage methodology, shifting from initial, file-based ETL (Extract, Transform, Load) to advanced geospatial processing and culminating in deep learning model setup.
 
-2. **Modeling**  
-   - **Wildfire Segmentation:** U‑Net/DeepLabV3+ trained on Sentinel‑2 → target = burned mask (binary).  
-   - **Wildfire Risk (Classification/Regression):** Gradient boosting or CNN‑LSTM/Transformer over temporal features to predict short‑horizon risk score or probability of burn.  
-   - **Crop Segmentation:** U‑Net/SegFormer; start binary (crop vs. non‑crop), then expand to multi‑class (selected CDL codes).
+***
 
-3. **Evaluation**  
-   - **Segmentation:** mIoU, F1, precision/recall.  
-   - **Risk:** AUROC/AUPRC (classification) or RMSE/MAE (regression).  
-   - **Generalization:** Train on Region A, test on Region B (holdout cities/biomes).  
-   - **Latency:** AOI‑to‑result time on the web platform.
+## 1. ETL & Data Stabilization Pipeline
 
-4. **Ablations**  
-   - Bands only vs. bands + indices vs. + slope.  
-   - With/without temporal aggregation.  
-   - Binary crop vs. selected multi‑class mapping.  
-   - Cross‑region transfer.
+The primary challenge was aligning disparate satellite products and resolving data sparsity.
+
+* **Data Sourcing and Alignment:** We successfully fused high-resolution **Sentinel-2/HLS** (30m, for predictors) and **VIIRS Active Fire** (375m, for labels). All subsequent steps align data to the project's target **EPSG:32610 (UTM)** grid.
+* **Label Generation (Vector-to-Raster):** We implemented a specialized pipeline to convert vector point data into a usable raster mask:
+    * **Filtering:** Applied a numeric filter ($\mathbf{\ge 7}$) to select high-confidence VIIRS points.
+    * **Buffering:** Solved the spatial mismatch problem by applying $\mathbf{187.5\text{ meter buffering}}$ to each 375m point using `geopandas`, effectively turning points into area polygons for accurate rasterization.
+    * **Rasterization:** Used `rasterio.features.rasterize` to burn the fire polygons onto a $\mathbf{30\text{m}}$ binary label mask.
+* **Tiling & Chipping:** We employed a **Dynamic Grid Generator** to precisely extract $\mathbf{32 \times 32}$ chips across the entire image tile (sampling the full image space, rather than a placeholder region).
+* **Augmentation:** Applied $\mathbf{8\times}$ geometric transformations (rotations and flips) to the $\mathbf{79}$ positive chips to mitigate the severe class imbalance and expand the training set.
+
+***
+
+## 2. Modeling and Prediction Methods
+
+We adopted specific machine learning architectures designed for semantic segmentation and time-series forecasting.
+
+* **Architecture:** **U-Net** was selected as the core architecture for **Wildfire Segmentation** due to its proven performance in generating precise, pixel-wise masks. 
+
+
+* **Input Features:** The model is fed $\mathbf{5}$ **Spectral Index Channels** (EVI, NBR, NDMI, etc.), which are the most potent features for predicting land-cover and moisture status.
+* **Loss Function:** **Dice Loss** (or a combined Dice + BCE loss) is used during training to effectively handle the extreme scarcity of positive (fire) pixels ($\mathbf{0.12\%}$ class imbalance).
+* **Risk Forecasting (Future):** The **Wildfire Risk** objective is slated to use **LSTM (Long Short-Term Memory)** networks or Gradient Boosting models applied to the temporal (lags, composites) and meteorological (ERA5) features.
+
+***
+
+## 3. Evaluation and Generalization Methods
+
+* **Segmentation Metrics:** Model performance is primarily evaluated using **Mean Intersection over Union ($\text{mIoU}$)** and **F1 Score** (Precision and Recall) to assess the spatial accuracy of the predicted burn mask relative to the ground truth.
+* **Generalization Testing:** The evaluation plan includes rigorous testing of cross-region transferability, where models trained on one geographic region will be tested on data from a separate, distinct biome to assess robustness.
 
 ---
 
 ## Web Platform (System Architecture)
 
-- **Frontend:** **Next.js** with a map viewport. Users **draw/upload AOI**, select a date window, and request layers.  
-- **Backend API:** **FastAPI** exposes `/aoi/analyze` → orchestrates: fetch mosaics (cached), tile, **batch inference**, and compose overlays.  
-- **Model Serving:** PyTorch models loaded once per worker; tiling/stitching pipeline returns GeoTIFF/PNG overlays + summaries.  
-- **Storage:** AOI requests, metadata, and cached rasters in object storage (e.g., S3/GCS); analytics in **PostgreSQL/PostGIS**.  
-- **Deployment:** Render/AWS/GCP; horizontal scale by AOI job queue.
+1. User Interface and API Core
+The system utilizes a two-tier structure for user interaction and service exposure. The Frontend is built with Next.js, providing a responsive web application and a map viewport where users can draw or upload a custom Area of Interest (AOI) and select a specific date window for analysis. This client-side request is routed to the central Backend API, which is exposed via FastAPI through the core endpoint: /aoi/analyze. This endpoint acts as the orchestration layer for all subsequent processing steps.
 
+2. Compute and Inference Pipeline
+The FastAPI backend manages the high-load geospatial processing. It first fetches necessary satellite mosaics from storage (leveraging caching), and then initiates the batch inference pipeline. The PyTorch models are maintained and loaded once per worker, minimizing latency overhead. This pipeline is responsible for tiling the fetched mosaics, executing the segmentation or risk prediction models, and stitching the results back together to compose the final data products (GeoTIFF/PNG overlays and summary analytics).
+
+3. Data Persistence and Scalability
+Data persistence and deployment are engineered for both scale and geospatial efficiency:
+
+Storage: All large binary files, including raw and cached rasters (mosaics, tiles), are stored in object storage (e.g., AWS S3 or Google Cloud Storage). Analytic results, AOI metadata, and job queues are persisted in a PostgreSQL/PostGIS database, leveraging PostGIS for efficient spatial indexing and query performance.
+
+Deployment: The entire architecture is containerized and deployed on cloud platforms (e.g., Render/AWS/GCP), configured for horizontal scaling managed by an AOI job queue. This ensures the system can handle a high volume of concurrent user requests without degradation in performance.
 
 ---
 
 
 ## Ethics & Responsible AI
 
-- Use only **open** satellite products and properly attribute sources.  
-- Document data limitations (e.g., resolution gaps, label uncertainty).  
-- Publish a **datasheet/model card** with intended use, failure modes, and fairness considerations (e.g., rural vs. urban performance).
+The platform is governed by a commitment to transparency, accountability, and responsible sourcing, ensuring that the AI outputs are trustworthy and ethically deployed. This commitment is met through three primary channels:
+
+### 1. Data Governance and Attribution
+
+We strictly adhere to using only open-access satellite products, ensuring full attribution of sources (e.g., NASA, Copernicus) and compliance with all public data licenses. A core responsibility is to proactively document all data limitations, including observed resolution gaps, temporal inconsistencies, and the inherent uncertainty present in ground truth labels (e.g., VIIRS point data vs. HLS pixel masks).
+
+### 2. Model Transparency and Accountability
+
+To ensure the responsible use of the predictive layers, the final deliverable will include a comprehensive model card or technical datasheet. This document serves as the foundation for accountability, explicitly detailing the model's intended purpose, its known failure modes, and critical performance metrics.
+
+### 3. Fairness and Performance Evaluation
+
+The model card will contain mandatory fairness considerations focused on spatial generalization. This involves evaluating and reporting performance disparities—such as differences in $\text{mIoU}$ or $\text{F1}$ scores—across distinct ecological or demographic areas (e.g., rural vs. urban performance, cross-region biomes) to ensure the platform’s predictions are reliable across the entire operational domain.
 
 ---
 
 ## Deliverables
 
-1. **Code Repository:** Reproducible ETL, training scripts, and serving code.  
-2. **Datasets:** Instructions + scripts to regenerate AOI tiles and masks.  
-3. **Models:** Trained weights, config files, and evaluation reports.  
-4. **Web App:** Next.js + FastAPI platform with AOI analytics.  
-5. **Report:** IEEE/ACM‑style paper, plus a slide deck and recorded demo.
+# 🚀 Final Submission Checklist (Assignment 04)
+
+This document outlines the final project deliverables and the required submission structure for the UMBC Data Science Capstone.
+
+---
+
+## I. Core Content Deliverables (What Must Be Built)
+
+These deliverables represent the fully implemented components and documentation required in the code repository.
+
+| Deliverable (Content) | Status | Required Repository Location |
+| :--- | :--- | :--- |
+| **1. Code Repository** | Fully Implemented | Root Folder (ETL scripts, training scripts) |
+| **2. Datasets** | Scripts Completed | Root Folder (e.g., `regenerate_data.py`) |
+| **3. Models** | Weights/Reports | Dedicated folder (e.g., `models/`, `reports/`) |
+| **4. Web App** | Next.js/FastAPI Code | Dedicated folder (e.g., `web/`, `api/`) |
+| **5. Presentation** | Final PPT + Demo | `docs/` folder (for PPT file) |
+
+---
+
+## II. Final Submission Structure (The Report.md Requirements)
+
+The final project report must adhere to the following strict naming and formatting criteria.
+
+| Requirement | Specification | Compliance Check |
+| :--- | :--- | :--- |
+| **1. Required File/Location** | `docs/report.md` | Must be a well-formatted Markdown file. |
+| **2. Title & Authors** | Title, your name, and "Fall 2025 Semester" | Must be placed at the **very top** of the `report.md` file. |
+| **3. External Links (Top)** | Active links to: (a) GitHub Repo, (b) YouTube Video, (c) PPT Presentation File. | Must be placed **immediately after** the Title/Authors section. |
+| **4. Report Content** | Must include: Background, Description of Data Sources, Data Elements, **Results of EDA**, **Results of ML**, Conclusion, and Future Research Direction. | All mandatory sections must be present. |
+| **5. Submission Link** | External Submission | Submit **only** the link to your main GitHub repository. |
+
+---
+
+**Immediate Next Steps:** Complete the Data Augmentation script and finalize the U-Net architecture. These final steps are necessary to populate the "Results of ML" section of your final `report.md`.
 
 ---
 
