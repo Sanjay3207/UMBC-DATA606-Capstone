@@ -11,7 +11,7 @@
 We are currently witnessing a critical convergence of environmental crises where climate change is simultaneously destabilizing natural ecosystems and agricultural foundations. Global temperatures are rising, leading to altered precipitation patterns and more frequent extreme weather events. This project focuses on two of the most immediate consequences of these shifts: the proliferation of catastrophic wildfires and the threat to agricultural productivity due to drought.
 
 ### The Wildfire Crisis
-Wildfires are no longer seasonal events restricted to specific regions; they have become a year-round global hazard. According to data referenced from the Food and Agriculture Organization (FAO) and NASA, wildfires burn an estimated **400 million hectares of land annually**. These events cause irreparable damage to biodiversity, destroy critical infrastructure, and release vast amounts of carbon dioxide into the atmosphere, creating a feedback loop that further accelerates climate warming.
+Wildfires are no longer seasonal events restricted to specific regions; they have become a year-round global hazard. According to data referenced from the Food and Agriculture Organization (FAO) and NASA, wildfires burn an estimated **400 million hectares of land annually**. These events cause irreparable damage to biodiversity, destroy critical infrastructure, and release vast amounts of carbon dioxide into the atmosphere, creating a feedbak loop that further accelerates climate warming.
 
 Traditional methods of wildfire monitoring—such as ground patrols or aerial surveys—are often reactive, dangerous, and difficult to scale across vast, remote territories. Furthermore, heavy smoke often renders standard optical satellite imagery useless during the most critical moments of a fire. This creates an urgent need for automated, sensor-agnostic systems capable of detecting thermal anomalies through smoke and cloud cover.
 
@@ -137,6 +137,10 @@ Extensive Exploratory Data Analysis (EDA) was performed to validate data integri
     * Analysis of the `h09v04` and `h08v04` tiles (covering Northern and Central California) revealed the highest density of thermal anomalies, with thousands of unique fire events recorded in July and August.
 * **Decision:** This insight guided our **"Point-Centered Chipping"** strategy, where we exclusively sampled 224x224 pixel regions centered on these high-confidence fire coordinates, ensuring our training dataset was class-balanced rather than dominated by empty space.
 
+**Figure 2:** A 3D topographic visualization of the VIIRS T4 (Brightness Temperature) channel. The active fire creates a distinct, high-intensity peak relative to the surrounding terrain, confirming the T4 band's suitability for segmentation tasks.
+
+![3D Thermal Intensity Plot](images/fig2_3d_thermal_intensity.png)
+
 ### B. Data Standardization & Harmonization
 * **Objective:** To unify disparate satellite data formats into a single machine-learning-ready pipeline.
 * **Technical Challenges:**
@@ -185,6 +189,11 @@ To address the challenge of mapping active fire perimeters through smoke, we dev
 
 * **Blind Test (Inference):** The model was evaluated on a completely unseen dataset from Julian Day **2024206**. Visual analysis confirmed that the U-Net could segment complex, multi-blob fire shapes—effectively delineating the "active front" of the fire—which offers significantly higher utility for disaster response than simple bounding boxes or point coordinates.
 
+**Figure 1:** Visual comparison of the U-Net model's inference. The model successfully isolates the active fire front (red/white pixels in the input) from the background, matching the ground truth mask with high precision.
+
+![U-Net Segmentation Results](images/fig1_unet_segmentation_results.png)
+
+
 ### B. Soil Moisture Forecasting (LSTM)
 
 To predict future drought conditions, we employed a Recurrent Neural Network (RNN) specialized for sequential data.
@@ -200,6 +209,18 @@ To predict future drought conditions, we employed a Recurrent Neural Network (RN
     * The model was trained for **30 epochs**, utilizing Mean Squared Error (MSE) as the loss function.
     * **Quantitative Results:** The final validation loss dropped to **0.0024**. Given that soil moisture typically ranges from 0.02 to 0.50, an error of this magnitude implies high-precision forecasting capabilities (error in the 3rd decimal place).
     * **Qualitative Results:** Forecast plots demonstrated that the LSTM accurately modeled the physics of soil drying—capturing the exponential decay of moisture during dry spells and the sharp re-wetting spikes following rain events. This confirms the model's utility as an early warning system for agricultural drought stress.
+
+**Figure 3:** Time-series validation of the LSTM model. The predicted values (Red) closely track the actual SMAP satellite readings (Blue), accurately capturing the seasonal "dry-down" trend and re-wetting events.
+
+![LSTM Time Series Forecast](images/fig3_lstm_forecast_timeseries.png)
+
+**Figure 4:** Statistical evaluation of the forecasting model. **Left:** The scatter plot aligns with the diagonal ($y=x$), indicating low bias. **Right:** The residuals are normally distributed around zero, confirming the model errors are random rather than systematic.
+
+![LSTM Error Analysis](images/fig4_lstm_error_analysis.png)
+
+**Figure 6:** Training stability of the LSTM network over 30 epochs. The convergence of Training Loss and Validation Loss indicates that the model generalizes well to unseen data without overfitting.
+
+![LSTM Training Loss](images/fig6_lstm_training_loss.png)
 
 ---
 
@@ -225,6 +246,10 @@ The deployment of our dual-model architecture yielded definitive results:
 Ultimately, this project bridges the gap between remote sensing observations and on-the-ground decision making. We have built a foundation that not only detects current environmental threats but predicts their trajectory, offering a blueprint for the next generation of AI-driven climate resilience systems.
 ---
 
+**Figure 7:** AI-Assisted Fire Mapping. This overlay demonstrates the model's practical utility: the predicted fire perimeter (Red) is projected directly onto the raw thermal sensor data (Greyscale), providing clear situational awareness for disaster response teams.
+
+![Fire Prediction Overlay](images/fig7_fire_prediction_overlay.png)
+
 ## 7. Limitations
 
 While the project successfully met its primary objectives, several technical constraints and data availability challenges shaped the final implementation. These limitations provide context for the results and highlight critical areas for future development.
@@ -248,6 +273,10 @@ While the project successfully met its primary objectives, several technical con
 * **Impact:**
     * **Blind Spots:** While this method is efficient for *monitoring known fires*, it limits the system's ability to detect *new* ignitions in areas where VIIRS has not yet triggered a hotspot.
     * **Inference Latency:** Deploying the U-Net for "Full Globe Inference" (scanning every pixel on Earth every day to find new fires) would require massive GPU cluster resources and incur significant cloud costs, making real-time global deployment challenging without further optimization (e.g., model quantization or pruning).
+
+**Figure 5:** Detailed error analysis of the segmentation model. The "Error Map" (bottom row, second from left) highlights False Positives in Red and False Negatives in Blue. While the model is highly accurate (Green), small smoldering edges are occasionally missed, likely due to the 375m resolution limit of the VIIRS sensor.
+
+![U-Net Error Analysis](images/fig5_unet_error_analysis.png)
 
 ---
 
