@@ -144,7 +144,7 @@ Extensive Exploratory Data Analysis (EDA) was performed to validate data integri
 
 **Figure 2:** A 3D topographic visualization of the VIIRS T4 (Brightness Temperature) channel. The active fire creates a distinct, high-intensity peak relative to the surrounding terrain, confirming the T4 band's suitability for segmentation tasks.
 
-![3D Thermal Intensity Plot](images/fig2_3d_thermal_intensity.jpg)
+![3D Thermal Intensity Plot](../images/fig2_3d_thermal_intensity.jpg)
 
 ### B. Data Standardization & Harmonization
 * **Objective:** To unify disparate satellite data formats into a single machine-learning-ready pipeline.
@@ -196,7 +196,7 @@ To address the challenge of mapping active fire perimeters through smoke, we dev
 
 **Figure 1:** Visual comparison of the U-Net model's inference. The model successfully isolates the active fire front (red/white pixels in the input) from the background, matching the ground truth mask with high precision.
 
-![U-Net Segmentation Results](images/fig1_unet_segmentation_results.jpg)
+![U-Net Segmentation Results](../images/fig1_unet_segmentation_results.jpg)
 
 
 ### B. Soil Moisture Forecasting (LSTM)
@@ -217,15 +217,15 @@ To predict future drought conditions, we employed a Recurrent Neural Network (RN
 
 **Figure 3:** Time-series validation of the LSTM model. The predicted values (Red) closely track the actual SMAP satellite readings (Blue), accurately capturing the seasonal "dry-down" trend and re-wetting events.
 
-![LSTM Time Series Forecast](images/fig3_lstm_forecast_timeseries.jpg)
+![LSTM Time Series Forecast](../images/fig3_lstm_forecast_timeseries.jpg)
 
 **Figure 4:** Statistical evaluation of the forecasting model. **Left:** The scatter plot aligns with the diagonal ($y=x$), indicating low bias. **Right:** The residuals are normally distributed around zero, confirming the model errors are random rather than systematic.
 
-![LSTM Error Analysis](images/fig4_lstm_error_analysis.jpg)
+![LSTM Error Analysis](../images/fig4_lstm_error_analysis.jpg)
 
 **Figure 6:** Training stability of the LSTM network over 30 epochs. The convergence of Training Loss and Validation Loss indicates that the model generalizes well to unseen data without overfitting.
 
-![LSTM Training Loss](images/fig6_lstm_training_loss.jpg)
+![LSTM Training Loss](../images/fig6_lstm_training_loss.jpg)
 
 ---
 
@@ -253,7 +253,7 @@ Ultimately, this project bridges the gap between remote sensing observations and
 
 **Figure 7:** AI-Assisted Fire Mapping. This overlay demonstrates the model's practical utility: the predicted fire perimeter (Red) is projected directly onto the raw thermal sensor data (Greyscale), providing clear situational awareness for disaster response teams.
 
-![Fire Prediction Overlay](images/fig7_fire_prediction_overlay.jpg)
+![Fire Prediction Overlay](../images/fig7_fire_prediction_overlay.jpg)
 
 ## 7. Limitations
 
@@ -281,7 +281,7 @@ While the project successfully met its primary objectives, several technical con
 
 **Figure 5:** Detailed error analysis of the segmentation model. The "Error Map" (bottom row, second from left) highlights False Positives in Red and False Negatives in Blue. While the model is highly accurate (Green), small smoldering edges are occasionally missed, likely due to the 375m resolution limit of the VIIRS sensor.
 
-![U-Net Error Analysis](images/fig5_unet_error_analysis.jpg)
+![U-Net Error Analysis](../images/fig5_unet_error_analysis.jpg)
 
 ---
 
