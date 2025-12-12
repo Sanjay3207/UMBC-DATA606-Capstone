@@ -144,7 +144,7 @@ Extensive Exploratory Data Analysis (EDA) was performed to validate data integri
 
 **Figure 2:** A 3D topographic visualization of the VIIRS T4 (Brightness Temperature) channel. The active fire creates a distinct, high-intensity peak relative to the surrounding terrain, confirming the T4 band's suitability for segmentation tasks.
 
-![3D Thermal Intensity Plot](images/fig2_3d_thermal_intensity.png)
+![3D Thermal Intensity Plot](images/fig2_3d_thermal_intensity)
 
 ### B. Data Standardization & Harmonization
 * **Objective:** To unify disparate satellite data formats into a single machine-learning-ready pipeline.
