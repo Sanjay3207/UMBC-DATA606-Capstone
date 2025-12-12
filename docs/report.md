@@ -3,6 +3,11 @@
 **Semester:** Spring 2025
 
 ---
+**YouTube video:**
+**PPT presentation:**
+**GitHub repo:**
+
+---
 
 
 ## 1. Background
