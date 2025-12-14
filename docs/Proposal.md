@@ -227,9 +227,9 @@ These deliverables represent the fully implemented components and documentation 
 | Deliverable (Content) | Status | Required Repository Location |
 | :--- | :--- | :--- |
 | **1. Code Repository** | Fully Implemented | Root Folder (ETL scripts, training scripts) |
-| **2. Datasets** | Scripts Completed | Root Folder (e.g., `regenerate_data.py`) |
-| **3. Models** | Weights/Reports | Dedicated folder (e.g., `models/`, `reports/`) |
-| **4. Web App** | Next.js/FastAPI Code | Dedicated folder (e.g., `web/`, `api/`) |
+| **2. Datasets** | Scripts Completed | Root Folder  |
+| **3. Models** | Weights/Reports | Dedicated folder (e.g., `models/`) |
+| **4. Web App** | Next.js/FastAPI Code | Dedicated folder (e.g., `app/`) |
 | **5. Presentation** | Final PPT + Demo | `docs/` folder (for PPT file) |
 
 ---
