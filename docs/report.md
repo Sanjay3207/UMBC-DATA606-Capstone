@@ -1,11 +1,15 @@
 # Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring
 **Author:** Akhil Kanukula, Sanjay Varatharajan
-**Semester:** Spring 2025
+**Semester:** Fall 2025
 
 ---
-**YouTube video:**
-**PPT presentation:**
-**GitHub repo:**
+## Quick Links
+
+| Resource | Link |
+|----------|------|
+| **YouTube Presentation** | [Watch the Video Presentation]() |
+| **PowerPoint Presentation** | [View Final PPT](https://github.com/Sanjay3207/UMBC-DATA606-Capstone/blob/main/docs/DEEP%20LEARNING-Simulating%20Land%20Cover%20Changes%20Using%20Diffusion-Based%20Generative%20Models.pptx) |
+| **GitHub Repository** | [https://github.com/Sanjay3207/UMBC-DATA606-Capstone](https://github.com/Sanjay3207/UMBC-DATA606-Capstone) |
 
 ---
 
