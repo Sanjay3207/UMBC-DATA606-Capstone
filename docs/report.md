@@ -1,6 +1,6 @@
 # Geospatial Machine Learning Platform for Wildfire Risk Assessment and Crop Health Monitoring
 **Author:** Akhil Kanukula, Sanjay Varatharajan
-**Semester:** Spring 2025
+**Semester:** Fall 2025
 
 ---
 **YouTube video:**
