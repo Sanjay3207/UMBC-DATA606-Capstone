@@ -3,9 +3,13 @@
 **Semester:** Fall 2025
 
 ---
-**YouTube video:**
-**PPT presentation:**
-**GitHub repo:**
+## Quick Links
+
+| Resource | Link |
+|----------|------|
+| **YouTube Presentation** | [Watch the Video Presentation]() |
+| **PowerPoint Presentation** | [View Final PPT]() |
+| **GitHub Repository** | [https://github.com/AkhilMittapalli/UMBC-DATA606-Capstone]() |
 
 ---
 
