@@ -8,7 +8,7 @@
 
 ---
 
-## 🔗 Quick Links
+##  Quick Links
 
 | Resource | Link |
 |----------|------|
@@ -18,7 +18,7 @@
 
 ---
 
-## 📌 Project Overview
+##  Project Overview
 
 This project addresses the critical convergence of environmental crises—specifically catastrophic wildfires and agricultural drought—by establishing a unified **Wildfire & Crop Monitoring Platform**. 
 
@@ -33,7 +33,7 @@ By harmonizing data from multiple satellite constellations (VIIRS, SMAP, ERA5) a
 
 ---
 
-## 🛰️ Data Pipeline & Sources
+##  Data Pipeline & Sources
 
 We built a custom ingestion engine to handle complex scientific formats (`NetCDF`, `HDF5`, `GeoTIFF`) and standardized them into machine-learning-ready tensors.
 
@@ -47,7 +47,7 @@ We built a custom ingestion engine to handle complex scientific formats (`NetCDF
 
 ---
 
-## 🧠 Model Architecture
+##  Model Architecture
 
 ### 1. Wildfire Segmentation (U-Net)
 * **Objective:** Map active fire perimeters through smoke.
@@ -68,7 +68,7 @@ We built a custom ingestion engine to handle complex scientific formats (`NetCDF
 
 ---
 
-## 📊 Key Results
+##  Key Results
 
 * **Thermal-Only Success:** Proved that thermal sensors (VIIRS) alone can map fires with high precision, overcoming the "Smoke Wall" that renders optical satellite imagery (RGB/NIR) useless during peak burning.
 * **High-Precision Forecasting:** The LSTM model captures the physics of soil drying, serving as a reliable early warning system for farmers.
@@ -76,7 +76,7 @@ We built a custom ingestion engine to handle complex scientific formats (`NetCDF
 
 ---
 
-## ⚠️ Limitations
+##  Limitations
 
 1.  **Optical Data Gaps:** Reliance on thermal-only data (due to smoke occlusion) can lead to false positives from industrial heat sources.
 2.  **Spatial Resolution:** SMAP soil moisture data (9km-36km resolution) is excellent for regional trends but lacks the granularity for field-level precision agriculture.
@@ -84,7 +84,7 @@ We built a custom ingestion engine to handle complex scientific formats (`NetCDF
 
 ---
 
-## 🚀 Future Roadmap
+##  Future Roadmap
 
 * **SAR Integration:** Integrate Synthetic Aperture Radar (Sentinel-1) to see through smoke and clouds with active sensing.
 * **Vision Transformers (ViT):** Move from CNNs to Transformers to better understand semantic context (distinguishing urban heat from forest fires).
@@ -92,4 +92,4 @@ We built a custom ingestion engine to handle complex scientific formats (`NetCDF
 
 ---
 
-## 📁 Repository Structure
+
